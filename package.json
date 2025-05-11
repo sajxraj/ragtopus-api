@@ -1,0 +1,66 @@
+{
+  "name": "shopify-order-management",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rimraf ./dist && tsc -p ./tsconfig.json",
+    "start:prod": "node -r ts-node/register/transpile-only -r tsconfig-paths/register ./dist/index.js",
+    "dev": "nodemon",
+    "prepare": "husky",
+    "eslint": "eslint './src/**/*.ts'",
+    "lint:check": "eslint \"{src,test}/**/*.ts\"",
+    "lint:fix": "npm run lint:check -- --fix",
+    "prettier:check": "prettier --check \"{src,test}/**/*.ts\"",
+    "prettier:fix": "prettier --write .",
+    "lint-staged": "npx lint-staged"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@langchain/core": "^0.3.55",
+    "@shopify/shopify-api": "^11.3.0",
+    "@supabase/supabase-js": "^2.49.4",
+    "add": "^2.0.6",
+    "basic-ftp": "^5.0.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "http-status": "^1.7.4",
+    "langchain": "^0.3.24",
+    "lodash": "^4.17.21",
+    "openai": "^4.98.0",
+    "pg": "^8.13.0",
+    "reflect-metadata": "^0.2.2",
+    "xml-js": "^1.6.11",
+    "yarn": "^1.22.22",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.9.1",
+    "@types/express": "^4.17.21",
+    "@types/lodash": "^4.17.7",
+    "@types/node": "^22.5.1",
+    "@typescript-eslint/eslint-plugin": "^8.3.0",
+    "@typescript-eslint/parser": "^8.3.0",
+    "concurrently": "^8.2.2",
+    "eslint": "^9.9.1",
+    "globals": "^15.9.0",
+    "husky": "^9.1.5",
+    "lint-staged": "^15.2.9",
+    "nodemon": "^3.1.4",
+    "prettier": "^3.3.3",
+    "rimraf": "^6.0.1",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.3.0"
+  },
+  "lint-staged": {
+    "src/**/*.{ts}": [
+      "yarn lint:fix",
+      "yarn prettier:fix"
+    ]
+  }
+}
