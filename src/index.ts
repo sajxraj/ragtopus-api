@@ -1,21 +1,12 @@
+import 'dotenv/config'
 import express, { Express, Request, Response } from 'express'
-import dotenv from 'dotenv'
-import OpenAI from 'openai'
-import { createClient } from '@supabase/supabase-js'
-
-dotenv.config()
+import bodyParser from 'body-parser'
+import { EmbeddingService } from '@src/ai/embedding/services/embedding.service'
 
 const app: Express = express()
 const port = process.env.PORT || 3000
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || ''
-});
-
-const supabase = createClient(
-  process.env.SUPABASE_URL || '',
-  process.env.SUPABASE_KEY || ''
-);
+app.use(bodyParser.json())
 
 app.get('/', (_req: Request, res: Response) => {
   res.send({
@@ -23,16 +14,30 @@ app.get('/', (_req: Request, res: Response) => {
   })
 })
 
-app.post('/embed', async (_req: Request, res: Response) => {
+app.post('/embed', async (req: Request, res: Response) => {
+  const url = req.body.url
+  const embeddingService = new EmbeddingService()
+  await embeddingService.generateEmbedding(url)
+
   res.send({
-    data: {}
+    message: 'Successfully added to the knowledge base',
   })
 })
 
-app.post('/query', async (_req: Request, res: Response) => {
-  res.send({
-    data: {}
-  })
+app.post('/query', async (req: Request, res: Response) => {
+  try {
+    const { query } = req.body
+
+    const embeddingService = new EmbeddingService()
+    const result = await embeddingService.handleQuery(query)
+
+    res.status(200).json(result)
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({
+      message: 'Error occurred',
+    })
+  }
 })
 
 app.listen(port, () => {
