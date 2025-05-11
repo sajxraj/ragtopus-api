@@ -19,7 +19,7 @@
 - [ExpressJS](https://expressjs.com/)
 - **PostgreSQL + pgvector** (vector DB)
 - TypeORM
-- **OpenAI** 
+- **OpenAI**
 - **Langchain.js**
 - **Embedding support**: OpenAI
 

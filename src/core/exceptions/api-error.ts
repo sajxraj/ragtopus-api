@@ -1,4 +1,4 @@
-class APIError extends Error {
+class ApiError extends Error {
   status: number
   message: string
   payload?: unknown
@@ -13,4 +13,4 @@ class APIError extends Error {
   }
 }
 
-export default APIError
+export default ApiError

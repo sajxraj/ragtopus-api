@@ -1,5 +1,5 @@
 import { EmbeddingFactory } from '@src/ai/embedding/services/embedding.factory'
-import { OpenAIClient } from '@src/ai/clients/openai/OpenAI'
+import { OpenAIClient } from '@src/ai/clients/openai/open-ai'
 import { SupabaseDb } from '@src/supabase/client/supabase'
 import { ChatCompletionMessageParam } from 'openai/resources/chat/completions'
 
