@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/ragtopus.png" alt="Project Logo" width="200"/>
+</p>
+
 # 🐙 RAGtopus
 
 **RAGtopus** is a Retrieval-Augmented Generation (RAG) framework powered by **Node.js** and **PostgreSQL with vector search**. Like a knowledge-hungry octopus, it reaches into your data lake with intelligent tentacles to fetch context, serve it to an LLM, and generate answers that actually make sense.
