@@ -1,3 +1,3 @@
 export interface EmbeddingInterface {
-  generateEmbedding(url: string): Promise<void>
+  generateEmbedding(url: string, opts?: { fetchChildren: boolean }): Promise<void>
 }

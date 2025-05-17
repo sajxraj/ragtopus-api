@@ -9,7 +9,7 @@ export class EmbeddingFactory {
       return new GoogleDocsStrategy()
     }
 
-    if (url.includes('confluence.atlassian.com')) {
+    if (url.includes('atlassian.net')) {
       return new ConfluenceStrategy()
     }
 

@@ -4,9 +4,9 @@ import { SupabaseDb } from '@src/supabase/client/supabase'
 import { ChatCompletionMessageParam } from 'openai/resources/chat/completions'
 
 export class EmbeddingService {
-  generateEmbedding = async (url: string): Promise<void> => {
+  generateEmbedding = async (url: string, opts?: { fetchChildren: boolean }): Promise<void> => {
     const embeddingStrategy = new EmbeddingFactory().create(url)
-    await embeddingStrategy.generateEmbedding(url)
+    await embeddingStrategy.generateEmbedding(url, opts)
   }
 
   async handleQuery(query: string) {

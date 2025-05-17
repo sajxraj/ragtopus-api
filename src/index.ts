@@ -2,6 +2,7 @@ import 'dotenv/config'
 import express, { Express, Request, Response } from 'express'
 import bodyParser from 'body-parser'
 import { EmbeddingService } from '@src/ai/embedding/services/embedding.service'
+import { z } from 'zod'
 
 const app: Express = express()
 const port = process.env.PORT || 3000
@@ -15,9 +16,9 @@ app.get('/', (_req: Request, res: Response) => {
 })
 
 app.post('/embed', async (req: Request, res: Response) => {
-  const url = req.body.url
+  const { url, fetchChildren } = req.body
   const embeddingService = new EmbeddingService()
-  await embeddingService.generateEmbedding(url)
+  await embeddingService.generateEmbedding(url, fetchChildren && { fetchChildren: z.boolean().parse(fetchChildren) })
 
   res.send({
     message: 'Successfully added to the knowledge base',
