@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { Request, Response, NextFunction } from 'express'
+import { NextFunction, Request, Response } from 'express'
 
 const SUPABASE_JWT_SECRET = process.env.SUPABASE_JWT_SECRET || ''
 
@@ -20,8 +20,7 @@ export function verifySupabaseToken(req: Request, res: Response, next: NextFunct
   const token = authHeader.split(' ')[1]
 
   try {
-    const decoded = jwt.verify(token, SUPABASE_JWT_SECRET) as SupabaseJWT
-    req.user = decoded
+    req.user = jwt.verify(token, SUPABASE_JWT_SECRET) as SupabaseJWT
     next()
   } catch (err) {
     const error = err as jwt.JsonWebTokenError

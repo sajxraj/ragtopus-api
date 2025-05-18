@@ -1,10 +1,10 @@
+import jwt from 'jsonwebtoken'
 import 'dotenv/config'
 import express, { Express, Request, Response } from 'express'
 import bodyParser from 'body-parser'
 import { EmbeddingService } from '@src/ai/embedding/services/embedding.service'
 import { z } from 'zod'
 import { verifySupabaseToken } from '@src/supabase/middlewares/verify-auth-token.middlware'
-import jwt from 'jsonwebtoken'
 import type {} from './types/express'
 
 const app: Express = express()
