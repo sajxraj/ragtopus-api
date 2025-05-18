@@ -3,6 +3,9 @@ import express, { Express, Request, Response } from 'express'
 import bodyParser from 'body-parser'
 import { EmbeddingService } from '@src/ai/embedding/services/embedding.service'
 import { z } from 'zod'
+import { verifySupabaseToken } from '@src/supabase/middlewares/verify-auth-token.middlware'
+import jwt from 'jsonwebtoken'
+import type {} from './types/express'
 
 const app: Express = express()
 const port = process.env.PORT || 3000
@@ -15,7 +18,7 @@ app.get('/', (_req: Request, res: Response) => {
   })
 })
 
-app.post('/embed', async (req: Request, res: Response) => {
+app.post('/embed', verifySupabaseToken, async (req: Request, res: Response) => {
   const { url, fetchChildren } = req.body
   const embeddingService = new EmbeddingService()
   await embeddingService.generateEmbedding(url, fetchChildren && { fetchChildren: z.boolean().parse(fetchChildren) })
@@ -25,7 +28,7 @@ app.post('/embed', async (req: Request, res: Response) => {
   })
 })
 
-app.post('/query', async (req: Request, res: Response) => {
+app.post('/query', verifySupabaseToken, async (req: Request, res: Response) => {
   try {
     const { query } = req.body
 
@@ -39,6 +42,21 @@ app.post('/query', async (req: Request, res: Response) => {
       message: 'Error occurred',
     })
   }
+})
+
+app.post('/auth', (req: Request, res: Response) => {
+  const payload = {
+    sub: req.body.userId,
+    email: req.body.email,
+    role: 'authenticated',
+    aud: 'authenticated',
+  }
+
+  const token = jwt.sign(payload, process.env.SUPABASE_JWT_SECRET!, { expiresIn: '1h' })
+
+  res.status(200).json({
+    data: token,
+  })
 })
 
 app.listen(port, () => {

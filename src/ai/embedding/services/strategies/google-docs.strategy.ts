@@ -10,11 +10,6 @@ export class GoogleDocsStrategy implements EmbeddingInterface {
     try {
       const docId = this.extractDocId(url)
 
-      console.log({
-        client_email: googleConfig.clientEmail,
-        private_key: googleConfig.privateKey,
-      })
-
       const auth = new google.auth.GoogleAuth({
         credentials: {
           client_email: googleConfig.clientEmail,
