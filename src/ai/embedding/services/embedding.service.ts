@@ -1,9 +1,10 @@
 import { EmbeddingFactory } from '@src/ai/embedding/services/embedding.factory'
-import { OpenAIClient } from '@src/ai/clients/openai/open-ai'
 import { SupabaseDb } from '@src/supabase/client/supabase'
 import { ChatCompletionMessageParam } from 'openai/resources/chat/completions'
 import { EmbeddingRequest } from '@src/types'
 import { EmbeddingUtils } from '@src/ai/embedding/utils/embedding.utils'
+import { z } from 'zod'
+import { OpenAIClient } from '@src/ai/clients/openai/open-ai'
 
 export class EmbeddingService {
   generateEmbedding = async (body: EmbeddingRequest): Promise<void> => {
@@ -11,15 +12,15 @@ export class EmbeddingService {
     await embeddingStrategy.generateEmbedding(body)
   }
 
-  async handleQuery(query: string) {
-    const input = query.replace(/\n/g, ' ')
-    const embedding = await EmbeddingUtils.generateEmbedding(input)
+  async handleQuery(query: string, knowledgeBaseId: string): Promise<string> {
+    const embedding = await EmbeddingUtils.generateEmbedding(query)
 
     const db = SupabaseDb.getInstance()
     const { data: documents, error } = await db.rpc('match_documents', {
       query_embedding: embedding,
-      match_threshold: 0.5,
-      match_count: 10,
+      match_threshold: 0.1,
+      match_count: 30,
+      kb_id: knowledgeBaseId,
     })
 
     if (error) {
@@ -49,6 +50,6 @@ export class EmbeddingService {
       temperature: 0.8,
     })
 
-    return completion.choices[0].message.content
+    return z.string().parse(completion.choices[0].message.content)
   }
 }

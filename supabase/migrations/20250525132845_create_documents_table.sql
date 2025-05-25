@@ -11,7 +11,8 @@ create table if not exists documents (
 create or replace function match_documents (
   query_embedding vector(1536),
   match_threshold float,
-  match_count int
+  match_count int,
+  kb_id UUID
 )
 returns table (
   id bigint,
@@ -21,14 +22,15 @@ returns table (
 language plpgsql
 as $$
 begin
-  return query
-  select
+return query
+select
     documents.id,
     documents.content,
     1 - (documents.embedding <=> query_embedding) as similarity
-  from documents
-  where 1 - (documents.embedding <=> query_embedding) > match_threshold
-  order by similarity desc
-  limit match_count;
+from documents
+where 1 - (documents.embedding <=> query_embedding) > match_threshold
+    and documents.knowledge_base_id = kb_id
+order by similarity desc
+    limit match_count;
 end;
 $$;

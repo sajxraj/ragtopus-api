@@ -5,7 +5,7 @@ import bodyParser from 'body-parser'
 import { EmbeddingService } from '@src/ai/embedding/services/embedding.service'
 import { verifySupabaseToken } from '@src/supabase/middlewares/verify-auth-token.middlware'
 import type {} from './types/express'
-import { EmbeddingRequestSchema } from '@src/types'
+import { ChatRequestSchema, EmbeddingRequestSchema } from '@src/types'
 import { SupabaseDb } from '@src/supabase/client/supabase'
 
 const app: Express = express()
@@ -21,7 +21,7 @@ app.get('/', (_req: Request, res: Response) => {
 
 app.post('/embed', verifySupabaseToken, async (req: Request, res: Response) => {
   const db = SupabaseDb.getInstance()
-  const knowledgeBase = await db.from('knowledge_bases').select('id, user_id').eq('name', req.body.knowledgeBaseId).single()
+  const knowledgeBase = await db.from('knowledge_bases').select('id, user_id').eq('id', req.body.knowledgeBaseId).single()
 
   if (!knowledgeBase.data) {
     return res.status(400).json({
@@ -46,10 +46,24 @@ app.post('/embed', verifySupabaseToken, async (req: Request, res: Response) => {
 
 app.post('/query', verifySupabaseToken, async (req: Request, res: Response) => {
   try {
-    const { query } = req.body
+    const db = SupabaseDb.getInstance()
+    const knowledgeBase = await db.from('knowledge_bases').select('id, user_id').eq('id', req.body.knowledgeBaseId).single()
 
+    if (!knowledgeBase.data) {
+      return res.status(400).json({
+        message: 'Knowledge base not found',
+      })
+    }
+
+    if (knowledgeBase.data.user_id !== req.user?.sub) {
+      return res.status(403).json({
+        message: 'You do not have permission to query this knowledge base',
+      })
+    }
+
+    const body = ChatRequestSchema.parse(req.body)
     const embeddingService = new EmbeddingService()
-    const result = await embeddingService.handleQuery(query)
+    const result = await embeddingService.handleQuery(body.query, body.knowledgeBaseId)
 
     res.status(200).json(result)
   } catch (error) {

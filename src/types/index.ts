@@ -6,3 +6,9 @@ export const EmbeddingRequestSchema = z.object({
   fetchChildren: z.boolean().optional(),
 })
 export type EmbeddingRequest = z.infer<typeof EmbeddingRequestSchema>
+
+export const ChatRequestSchema = z.object({
+  query: z.string(),
+  knowledgeBaseId: z.string(),
+})
+export type ChatRequest = z.infer<typeof ChatRequestSchema>
