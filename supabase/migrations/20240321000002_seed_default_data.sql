@@ -2,13 +2,13 @@
 INSERT INTO auth.users (id, email, encrypted_password, email_confirmed_at, created_at, updated_at)
 SELECT 
     '00000000-0000-0000-0000-000000000000',
-    'admin@example.com',
+    'admin@ragtopus.com',
     crypt('admin123', gen_salt('bf')),
     NOW(),
     NOW(),
     NOW()
 WHERE NOT EXISTS (
-    SELECT 1 FROM auth.users WHERE email = 'admin@example.com'
+    SELECT 1 FROM auth.users WHERE email = 'admin@ragtopus.com'
 );
 
 -- Insert default knowledge base if not exists
