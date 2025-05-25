@@ -3,6 +3,7 @@ import { OpenAIClient } from '@src/ai/clients/openai/open-ai'
 import { SupabaseDb } from '@src/supabase/client/supabase'
 import { ChatCompletionMessageParam } from 'openai/resources/chat/completions'
 import { EmbeddingRequest } from '@src/types'
+import { EmbeddingUtils } from '@src/ai/embedding/utils/embedding.utils'
 
 export class EmbeddingService {
   generateEmbedding = async (body: EmbeddingRequest): Promise<void> => {
@@ -12,14 +13,7 @@ export class EmbeddingService {
 
   async handleQuery(query: string) {
     const input = query.replace(/\n/g, ' ')
-
-    const openai = OpenAIClient.getClient()
-    const embeddingResponse = await openai.embeddings.create({
-      model: 'text-embedding-3-small',
-      input,
-    })
-
-    const [{ embedding }] = embeddingResponse.data
+    const embedding = await EmbeddingUtils.generateEmbedding(input)
 
     const db = SupabaseDb.getInstance()
     const { data: documents, error } = await db.rpc('match_documents', {
@@ -33,7 +27,6 @@ export class EmbeddingService {
     }
 
     let contextText = ''
-
     contextText += documents.map((document: { content: string }) => `${document.content.trim()}---\n`).join('')
 
     const messages: ChatCompletionMessageParam[] = [
@@ -49,6 +42,7 @@ export class EmbeddingService {
       },
     ]
 
+    const openai = OpenAIClient.getClient()
     const completion = await openai.chat.completions.create({
       messages,
       model: 'gpt-4',
