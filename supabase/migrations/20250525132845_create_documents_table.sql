@@ -3,7 +3,6 @@ create table if not exists documents (
     content TEXT,
     embedding vector(1536),
     knowledge_base_id UUID NOT NULL REFERENCES knowledge_bases(id) ON DELETE CASCADE,
-    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     created_at timestamp with time zone default current_timestamp,
     updated_at timestamp with time zone default current_timestamp
 );

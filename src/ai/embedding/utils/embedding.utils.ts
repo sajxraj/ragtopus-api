@@ -25,7 +25,6 @@ export class EmbeddingUtils {
       content: content.replace(/\n/g, ' '),
       embedding,
       knowledge_base_id: body.knowledgeBaseId,
-      user_id: body.userId,
     })
 
     if (error) {
