@@ -2,11 +2,12 @@ import { EmbeddingFactory } from '@src/ai/embedding/services/embedding.factory'
 import { OpenAIClient } from '@src/ai/clients/openai/open-ai'
 import { SupabaseDb } from '@src/supabase/client/supabase'
 import { ChatCompletionMessageParam } from 'openai/resources/chat/completions'
+import { EmbeddingRequest } from '@src/types'
 
 export class EmbeddingService {
-  generateEmbedding = async (url: string, opts?: { fetchChildren: boolean }): Promise<void> => {
-    const embeddingStrategy = new EmbeddingFactory().create(url)
-    await embeddingStrategy.generateEmbedding(url, opts)
+  generateEmbedding = async (body: EmbeddingRequest): Promise<void> => {
+    const embeddingStrategy = new EmbeddingFactory().create(body.url)
+    await embeddingStrategy.generateEmbedding(body)
   }
 
   async handleQuery(query: string) {

@@ -1,14 +1,13 @@
 import { google } from 'googleapis'
-import { OpenAIClient } from '@src/ai/clients/openai/open-ai'
 import { EmbeddingInterface } from '@src/ai/embedding/services/strategies/embedding.interface'
-import { SupabaseDb } from '@src/supabase/client/supabase'
-import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter'
 import googleConfig from '@src/configs/google'
+import { EmbeddingRequest } from '@src/types'
+import { EmbeddingUtils } from '@src/ai/embedding/utils/embedding.utils'
 
 export class GoogleDocsStrategy implements EmbeddingInterface {
-  async generateEmbedding(url: string): Promise<void> {
+  async generateEmbedding(body: EmbeddingRequest): Promise<void> {
     try {
-      const docId = this.extractDocId(url)
+      const docId = this.extractDocId(body.url)
 
       const auth = new google.auth.GoogleAuth({
         credentials: {
@@ -39,42 +38,7 @@ export class GoogleDocsStrategy implements EmbeddingInterface {
           ?.map((block) => block.paragraph?.elements?.map((el) => el.textRun?.content).join(''))
           .join('\n') || ''
 
-      const textSplitter = new RecursiveCharacterTextSplitter({
-        chunkSize: 1000,
-        chunkOverlap: 200,
-      })
-
-      const chunks = await textSplitter.splitText(content)
-
-      const promises = chunks.map(async (chunk) => {
-        try {
-          const cleanChunk = chunk.replace(/\n/g, ' ')
-
-          const openai = OpenAIClient.getClient()
-
-          const embeddingResponse = await openai.embeddings.create({
-            model: 'text-embedding-3-small',
-            input: cleanChunk,
-          })
-
-          const [{ embedding }] = embeddingResponse.data
-
-          const db = SupabaseDb.getInstance()
-          const { error } = await db.from('documents').insert({
-            content: cleanChunk,
-            embedding,
-          })
-
-          if (error) {
-            throw error
-          }
-        } catch (error) {
-          console.error('Error processing chunk:', error)
-          throw error
-        }
-      })
-
-      await Promise.all(promises)
+      await EmbeddingUtils.processContent(content, body)
     } catch (error) {
       console.error('Error in GoogleDocsStrategy:', error)
       throw error

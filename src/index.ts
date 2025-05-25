@@ -3,9 +3,9 @@ import 'dotenv/config'
 import express, { Express, Request, Response } from 'express'
 import bodyParser from 'body-parser'
 import { EmbeddingService } from '@src/ai/embedding/services/embedding.service'
-import { z } from 'zod'
 import { verifySupabaseToken } from '@src/supabase/middlewares/verify-auth-token.middlware'
 import type {} from './types/express'
+import { EmbeddingRequestSchema } from '@src/types'
 
 const app: Express = express()
 const port = process.env.PORT || 3000
@@ -19,9 +19,12 @@ app.get('/', (_req: Request, res: Response) => {
 })
 
 app.post('/embed', verifySupabaseToken, async (req: Request, res: Response) => {
-  const { url, fetchChildren } = req.body
+  const body = EmbeddingRequestSchema.parse({
+    ...req.body,
+    userId: req.user?.sub,
+  })
   const embeddingService = new EmbeddingService()
-  await embeddingService.generateEmbedding(url, fetchChildren && { fetchChildren: z.boolean().parse(fetchChildren) })
+  await embeddingService.generateEmbedding(body)
 
   res.send({
     message: 'Successfully added to the knowledge base',

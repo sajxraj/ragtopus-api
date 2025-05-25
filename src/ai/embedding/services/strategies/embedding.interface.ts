@@ -1,3 +1,5 @@
+import { EmbeddingRequest } from '@src/types'
+
 export interface EmbeddingInterface {
-  generateEmbedding(url: string, opts?: { fetchChildren: boolean }): Promise<void>
+  generateEmbedding(body: EmbeddingRequest): Promise<void>
 }

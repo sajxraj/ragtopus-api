@@ -1,10 +1,9 @@
 import axios from 'axios'
 import { htmlToText } from 'html-to-text'
 import { EmbeddingInterface } from '@src/ai/embedding/services/strategies/embedding.interface'
-import { SupabaseDb } from '@src/supabase/client/supabase'
-import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter'
-import { OpenAIClient } from '@src/ai/clients/openai/open-ai'
 import atlassianConfig from '@src/configs/atlassian'
+import { EmbeddingRequest } from '@src/types'
+import { EmbeddingUtils } from '@src/ai/embedding/utils/embedding.utils'
 
 function extractConfluenceInfo(url: string): { type: 'page' | 'space'; baseUrl: string; spaceKey: string; pageId?: string } {
   // Page URL: https://example.atlassian.net/wiki/spaces/SPACEKEY/pages/123456789/Page-Title
@@ -120,13 +119,13 @@ async function fetchAllPagesInSpace(
 }
 
 export class ConfluenceStrategy implements EmbeddingInterface {
-  async generateEmbedding(url: string, opts?: { fetchChildren: boolean }): Promise<void> {
+  async generateEmbedding(body: EmbeddingRequest): Promise<void> {
     try {
       const apiToken = atlassianConfig.apiToken
       if (!apiToken) {
         throw new Error('Missing Atlassian configuration.')
       }
-      const info = extractConfluenceInfo(url)
+      const info = extractConfluenceInfo(body.url)
       let pages: ConfluencePage[] = []
       if (info.type === 'page') {
         pages = await fetchPageAndChildren(
@@ -134,42 +133,16 @@ export class ConfluenceStrategy implements EmbeddingInterface {
           info.pageId!,
           'sajan.rajbhandari@outside.studio',
           apiToken,
-          opts?.fetchChildren ?? false,
+          body?.fetchChildren ?? false,
         )
       } else if (info.type === 'space') {
         pages = await fetchAllPagesInSpace(info.baseUrl, info.spaceKey, 'sajan.rajbhandari@outside.studio', apiToken)
       }
-      const docs = pages.map((page) => ({
-        pageContent: htmlToText(page.body?.storage?.value || '', { wordwrap: false }),
-        metadata: {
-          id: page.id,
-          title: page.title,
-          url: `${info.baseUrl}/spaces/${info.spaceKey}/pages/${page.id}`,
-        },
-      }))
-      const textSplitter = new RecursiveCharacterTextSplitter({
-        chunkSize: 1000,
-        chunkOverlap: 200,
-      })
-      const chunks = await textSplitter.splitDocuments(docs)
-      const openai = OpenAIClient.getClient()
-      const db = SupabaseDb.getInstance()
-      const promises = chunks.map(async (chunk) => {
-        const cleanChunk = chunk.pageContent.replace(/\n/g, ' ')
-        const embeddingResponse = await openai.embeddings.create({
-          model: 'text-embedding-3-small',
-          input: cleanChunk,
-        })
-        const [{ embedding }] = embeddingResponse.data
-        const { error } = await db.from('documents').insert({
-          content: cleanChunk,
-          embedding,
-        })
-        if (error) {
-          throw error
-        }
-      })
-      await Promise.all(promises)
+
+      // Convert all pages to text and combine
+      const content = pages.map((page) => htmlToText(page.body?.storage?.value || '', { wordwrap: false })).join('\n\n')
+
+      await EmbeddingUtils.processContent(content, body)
     } catch (error) {
       console.error('Error in ConfluenceStrategy:', error)
       throw error
