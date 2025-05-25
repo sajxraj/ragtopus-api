@@ -1,6 +1,7 @@
 CREATE TABLE IF NOT EXISTS knowledge_bases (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    name TEXT NOT NULL,
+    name VARCHAR NOT NULL,
+    description TEXT,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     status BOOLEAN DEFAULT true,
     created_at TIMESTAMPTZ DEFAULT NOW(),

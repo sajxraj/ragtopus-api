@@ -12,10 +12,11 @@ WHERE NOT EXISTS (
 );
 
 -- Insert default knowledge base if not exists
-INSERT INTO knowledge_bases (id, name, user_id, status)
+INSERT INTO knowledge_bases (id, name, description, user_id, status)
 SELECT 
     '00000000-0000-0000-0000-000000000001',
     'Default Knowledge Base',
+    'This is the default knowledge base created for the application.',
     '00000000-0000-0000-0000-000000000000',
     true
 WHERE NOT EXISTS (
