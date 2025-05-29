@@ -44,7 +44,7 @@ app.post('/public/v1/chat/:id', async (req: Request, res: Response) => {
   await chatPublicAction.chat(req, res)
 })
 
-app.post('v1/knowledge-bases/query', verifySupabaseToken, async (req: Request, res: Response) => {
+app.post('/v1/knowledge-bases/query', verifySupabaseToken, async (req: Request, res: Response) => {
   try {
     const db = SupabaseDb.getInstance()
     const knowledgeBase = await db.from('knowledge_bases').select('id, user_id').eq('id', req.body.knowledgeBaseId).single()
