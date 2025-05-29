@@ -1,7 +1,7 @@
 import { EmbeddingFactory } from '@src/ai/embedding/services/embedding.factory'
 import { SupabaseDb } from '@src/supabase/client/supabase'
 import { ChatCompletionMessageParam } from 'openai/resources/chat/completions'
-import { AnyEmbeddingRequest, EmbeddingRequest, PdfEmbeddingRequest } from '@src/types'
+import { AnyEmbeddingRequest, ChatContext, ChatContextSchema, EmbeddingRequest, PdfEmbeddingRequest } from '@src/types'
 import { EmbeddingUtils } from '@src/ai/embedding/utils/embedding.utils'
 import { z } from 'zod'
 import { OpenAIClient } from '@src/ai/clients/openai/open-ai'
@@ -20,7 +20,7 @@ export class EmbeddingService {
     }
   }
 
-  async handleQuery(query: string, knowledgeBaseId: string): Promise<string> {
+  async handleQuery(query: string, knowledgeBaseId: string, context?: ChatContext[]): Promise<string> {
     const embedding = await EmbeddingUtils.generateEmbedding(query)
 
     const db = SupabaseDb.getInstance()
@@ -46,8 +46,13 @@ export class EmbeddingService {
           If you don't know the answer, just say that you don't know, don't try to make up an answer.`,
       },
       {
+        role: 'system',
+        content: `Context sections: "${contextText}"`,
+      },
+      ...((context || []).map((c) => ChatContextSchema.parse(c)) as ChatCompletionMessageParam[]),
+      {
         role: 'user',
-        content: `Context sections: "${contextText}" Question: "${query}" Answer as simple text:`,
+        content: `Question: "${query}"`,
       },
     ]
 

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { Role } from '@src/ai/types'
 
 export const EmbeddingRequestSchema = z.object({
   url: z.string().optional(), // Made url optional
@@ -20,3 +21,24 @@ export type PdfEmbeddingRequest = z.infer<typeof PdfEmbeddingRequestSchema>
 
 export const AnyEmbeddingRequestSchema = z.union([EmbeddingRequestSchema, PdfEmbeddingRequestSchema])
 export type AnyEmbeddingRequest = z.infer<typeof AnyEmbeddingRequestSchema>
+
+export const ChatContextSchema = z
+  .object({
+    role: z.nativeEnum(Role),
+    message: z.string(),
+  })
+  .optional()
+export type ChatContext = z.infer<typeof ChatContextSchema>
+
+export const PublicChatRequestSchema = z.object({
+  message: z.string(),
+  context: z
+    .array(
+      z.object({
+        role: z.nativeEnum(Role),
+        message: z.string(),
+      }),
+    )
+    .optional(),
+})
+export type PublicChatRequest = z.infer<typeof PublicChatRequestSchema>
