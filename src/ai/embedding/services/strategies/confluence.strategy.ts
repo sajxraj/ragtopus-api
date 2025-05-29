@@ -125,6 +125,9 @@ export class ConfluenceStrategy implements EmbeddingInterface {
       if (!apiToken) {
         throw new Error('Missing Atlassian configuration.')
       }
+      if (!body.url) {
+        throw new Error('URL is required for Confluence embedding.')
+      }
       const info = extractConfluenceInfo(body.url)
       let pages: ConfluencePage[] = []
       if (info.type === 'page') {

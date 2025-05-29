@@ -7,6 +7,10 @@ import { EmbeddingUtils } from '@src/ai/embedding/utils/embedding.utils'
 export class GoogleDocsStrategy implements EmbeddingInterface {
   async generateEmbedding(body: EmbeddingRequest): Promise<void> {
     try {
+      if (!body.url) {
+        throw new Error('URL is required for Google Docs embedding.')
+      }
+
       const docId = this.extractDocId(body.url)
 
       const auth = new google.auth.GoogleAuth({

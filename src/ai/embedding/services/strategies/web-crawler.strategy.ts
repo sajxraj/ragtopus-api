@@ -5,6 +5,10 @@ import { EmbeddingUtils } from '@src/ai/embedding/utils/embedding.utils'
 
 export class WebCrawlerStrategy implements EmbeddingInterface {
   async generateEmbedding(body: EmbeddingRequest): Promise<void> {
+    if (!body.url) {
+      throw new Error('URL is required for Web embedding.')
+    }
+
     const loader = new CheerioWebBaseLoader(body.url)
     const docs = await loader.load()
 

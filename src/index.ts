@@ -1,15 +1,20 @@
 import jwt from 'jsonwebtoken'
 import 'dotenv/config'
-import express, { Express, Request, Response } from 'express'
+import express, { Express, Request, Response, NextFunction } from 'express'
 import bodyParser from 'body-parser'
+import multer from 'multer'
 import { EmbeddingService } from '@src/ai/embedding/services/embedding.service'
 import { verifySupabaseToken } from '@src/supabase/middlewares/verify-auth-token.middlware'
 import type {} from './types/express'
-import { ChatRequestSchema, EmbeddingRequestSchema } from '@src/types'
+import { ChatRequestSchema, EmbeddingRequestSchema, PdfEmbeddingRequestSchema } from '@src/types'
 import { SupabaseDb } from '@src/supabase/client/supabase'
+import { z } from 'zod'
 
 const app: Express = express()
 const port = process.env.PORT || 3000
+
+const storage = multer.memoryStorage()
+const upload = multer({ storage })
 
 app.use(bodyParser.json())
 
@@ -19,8 +24,15 @@ app.get('/', (_req: Request, res: Response) => {
   })
 })
 
-app.post('/embed', verifySupabaseToken, async (req: Request, res: Response) => {
+const multerUpload = upload.single('file') as unknown as (req: Request, res: Response, next: NextFunction) => void
+
+app.post('/embed', verifySupabaseToken, multerUpload, async (req: Request, res: Response) => {
   const db = SupabaseDb.getInstance()
+
+  if (!req.body.knowledgeBaseId) {
+    return res.status(400).json({ message: 'knowledgeBaseId is required.' })
+  }
+
   const knowledgeBase = await db.from('knowledge_bases').select('id, user_id').eq('id', req.body.knowledgeBaseId).single()
 
   if (!knowledgeBase.data) {
@@ -35,13 +47,30 @@ app.post('/embed', verifySupabaseToken, async (req: Request, res: Response) => {
     })
   }
 
-  const body = EmbeddingRequestSchema.parse(req.body)
-  const embeddingService = new EmbeddingService()
-  await embeddingService.generateEmbedding(body)
+  try {
+    let validatedBody
+    if (req.file) {
+      const pdfRequestBody = { ...req.body, sourceType: 'pdf' }
+      validatedBody = PdfEmbeddingRequestSchema.parse(pdfRequestBody)
+    } else {
+      validatedBody = EmbeddingRequestSchema.parse(req.body)
+    }
 
-  res.send({
-    message: 'Successfully added to the knowledge base',
-  })
+    const embeddingService = new EmbeddingService()
+    await embeddingService.generateEmbedding(validatedBody, req.file)
+
+    res.send({
+      message: 'Successfully added to the knowledge base',
+    })
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ message: 'Validation error', errors: error.errors })
+    }
+
+    const errorMessage =
+      error instanceof Error ? error.message : 'Failed to process embedding request due to an unexpected error.'
+    return res.status(500).json({ message: errorMessage })
+  }
 })
 
 app.post('/query', verifySupabaseToken, async (req: Request, res: Response) => {

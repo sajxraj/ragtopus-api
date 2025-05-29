@@ -1,15 +1,23 @@
 import { EmbeddingFactory } from '@src/ai/embedding/services/embedding.factory'
 import { SupabaseDb } from '@src/supabase/client/supabase'
 import { ChatCompletionMessageParam } from 'openai/resources/chat/completions'
-import { EmbeddingRequest } from '@src/types'
+import { AnyEmbeddingRequest, EmbeddingRequest, PdfEmbeddingRequest } from '@src/types'
 import { EmbeddingUtils } from '@src/ai/embedding/utils/embedding.utils'
 import { z } from 'zod'
 import { OpenAIClient } from '@src/ai/clients/openai/open-ai'
+import { PdfStrategy } from '@src/ai/embedding/services/strategies/pdf.strategy'
 
 export class EmbeddingService {
-  generateEmbedding = async (body: EmbeddingRequest): Promise<void> => {
-    const embeddingStrategy = new EmbeddingFactory().create(body.url)
-    await embeddingStrategy.generateEmbedding(body)
+  generateEmbedding = async (body: AnyEmbeddingRequest, file?: Express.Multer.File): Promise<void> => {
+    if (file && (body as PdfEmbeddingRequest).sourceType === 'pdf') {
+      const pdfStrategy = new PdfStrategy()
+      await pdfStrategy.generateEmbedding(body as PdfEmbeddingRequest, file)
+    } else if (body.url) {
+      const embeddingStrategy = new EmbeddingFactory().create(body.url)
+      await embeddingStrategy.generateEmbedding(body as EmbeddingRequest) // Cast to EmbeddingRequest
+    } else {
+      throw new Error('Invalid embedding request: Missing URL or file for PDF.')
+    }
   }
 
   async handleQuery(query: string, knowledgeBaseId: string): Promise<string> {
