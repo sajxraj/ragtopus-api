@@ -32,11 +32,18 @@ export class GeneratePublicLinkAction {
         })
       }
 
+      if (!req.body?.secret) {
+        return res.status(422).json({
+          message: 'Secret is required to create a public link',
+        })
+      }
+
       const publicLink = await db
         .from('public_links')
         .insert({
           knowledge_base_id: knowledgeBase.data.id,
           user_id: knowledgeBase.data.user_id,
+          secret: req.body.secret,
         })
         .select('id, knowledge_base_id')
         .single()

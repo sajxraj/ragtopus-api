@@ -3,10 +3,10 @@ CREATE TABLE IF NOT EXISTS public_links (
     knowledge_base_id UUID NOT NULL REFERENCES knowledge_bases(id) ON DELETE CASCADE,
     status BOOLEAN DEFAULT true,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    secret TEXT NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS public_links_user_id_idx ON public_links(user_id);
 CREATE INDEX IF NOT EXISTS public_links_knowledge_base_id_idx ON public_links(knowledge_base_id);
-

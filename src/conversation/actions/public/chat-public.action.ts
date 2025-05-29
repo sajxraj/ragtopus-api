@@ -14,12 +14,17 @@ export class ChatPublicAction {
       const db = SupabaseDb.getInstance()
 
       const id = z.string().parse(req.params.id)
-      const publicLink = await db.from('public_links').select('id, knowledge_base_id').eq('id', id).single()
+      const publicLink = await db.from('public_links').select('id, knowledge_base_id, secret').eq('id', id).single()
 
       if (!publicLink.data) {
         return res.status(400).json({
           message: 'Public link not found',
         })
+      }
+
+      const token = req.header('x-ragtopus-token')
+      if (!token || token !== publicLink.data.secret) {
+        return res.status(401).json({ message: 'Unauthorized' })
       }
 
       const knowledgeBase = await db
