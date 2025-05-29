@@ -14,7 +14,7 @@ export class EmbeddingService {
       await pdfStrategy.generateEmbedding(body as PdfEmbeddingRequest, file)
     } else if (body.url) {
       const embeddingStrategy = new EmbeddingFactory().create(body.url)
-      await embeddingStrategy.generateEmbedding(body as EmbeddingRequest) // Cast to EmbeddingRequest
+      await embeddingStrategy.generateEmbedding(body as EmbeddingRequest)
     } else {
       throw new Error('Invalid embedding request: Missing URL or file for PDF.')
     }
