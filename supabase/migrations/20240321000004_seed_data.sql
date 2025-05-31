@@ -1,4 +1,4 @@
--- Insert or update default user
+-- Insert default user if not exists
 INSERT INTO auth.users (id, email, encrypted_password, email_confirmed_at, created_at, updated_at)
 VALUES (
     '00000000-0000-0000-0000-000000000000',
@@ -14,7 +14,7 @@ ON CONFLICT (id) DO UPDATE SET
     email_confirmed_at = EXCLUDED.email_confirmed_at,
     updated_at = NOW();
 
--- Insert or update default admin profile
+-- Insert default admin profile if not exists
 INSERT INTO profiles (id, name, role)
 VALUES (
     '00000000-0000-0000-0000-000000000000',
@@ -26,7 +26,7 @@ ON CONFLICT (id) DO UPDATE SET
     role = EXCLUDED.role,
     updated_at = NOW();
 
--- Insert or update default knowledge base
+-- Insert default knowledge base if not exists
 INSERT INTO knowledge_bases (id, name, description, user_id, status)
 VALUES (
     '00000000-0000-0000-0000-000000000001',
