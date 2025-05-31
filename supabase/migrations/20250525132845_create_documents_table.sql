@@ -34,3 +34,8 @@ order by similarity desc
     limit match_count;
 end;
 $$;
+
+create trigger update_documents_updated_at
+  before update on documents
+  for each row
+  execute function update_updated_at_column();

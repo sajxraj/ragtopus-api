@@ -21,6 +21,7 @@ export function verifySupabaseToken(req: Request, res: Response, next: NextFunct
 
   try {
     req.user = jwt.verify(token, SUPABASE_JWT_SECRET) as SupabaseJWT
+    console.log(req.user)
     next()
   } catch (err) {
     const error = err as jwt.JsonWebTokenError

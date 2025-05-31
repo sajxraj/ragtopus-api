@@ -13,7 +13,8 @@
     "lint:fix": "npm run lint:check -- --fix",
     "prettier:check": "prettier --check \"{src,test}/**/*.ts\"",
     "prettier:fix": "prettier --write .",
-    "lint-staged": "npx lint-staged"
+    "lint-staged": "npx lint-staged",
+    "db:migrate": "npx supabase db push"
   },
   "keywords": [],
   "author": "",
