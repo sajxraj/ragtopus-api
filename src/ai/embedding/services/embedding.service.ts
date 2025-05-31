@@ -59,7 +59,7 @@ export class EmbeddingService {
     const openai = OpenAIClient.getClient()
     const completion = await openai.chat.completions.create({
       messages,
-      model: 'gpt-4',
+      model: 'gpt-4o',
       temperature: 0.8,
     })
 
