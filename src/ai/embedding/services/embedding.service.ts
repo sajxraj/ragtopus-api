@@ -1,7 +1,7 @@
 import { EmbeddingFactory } from '@src/ai/embedding/services/embedding.factory'
 import { SupabaseDb } from '@src/supabase/client/supabase'
 import { ChatCompletionMessageParam } from 'openai/resources/chat/completions'
-import { AnyEmbeddingRequest, ChatContext, ChatContextSchema, EmbeddingRequest, PdfEmbeddingRequest } from '@src/types'
+import { AnyEmbeddingRequest, ChatContext, EmbeddingRequest, PdfEmbeddingRequest } from '@src/types'
 import { EmbeddingUtils } from '@src/ai/embedding/utils/embedding.utils'
 import { z } from 'zod'
 import { OpenAIClient } from '@src/ai/clients/openai/open-ai'
@@ -60,7 +60,15 @@ export class EmbeddingService {
           role: 'system',
           content: `Context sections: "${contextText}"`,
         },
-        ...((context || []).map((c) => ChatContextSchema.parse(c)) as ChatCompletionMessageParam[]),
+        ...((context || [])
+          .filter(
+            (c): c is NonNullable<typeof c> =>
+              c !== undefined && c !== null && typeof c.message === 'string' && c.message.trim().length > 0,
+          )
+          .map((c) => ({
+            role: c.role,
+            content: c.message.trim(),
+          })) as ChatCompletionMessageParam[]),
         {
           role: 'user',
           content: `Question: "${query}"`,
@@ -112,13 +120,22 @@ export class EmbeddingService {
           role: 'system',
           content: `You are a helpful assistant. You are given the context sections below. 
             Use them to answer the question. 
-            If you don't know the answer, just say that you don't know, don't try to make up an answer.`,
+            If you don't know the answer, just say that you don't know, don't try to make up an answer.
+            You should maintain context from previous messages in the conversation.`,
         },
         {
           role: 'system',
           content: `Context sections: "${contextText}"`,
         },
-        ...((context || []).map((c) => ChatContextSchema.parse(c)) as ChatCompletionMessageParam[]),
+        ...((context || [])
+          .filter(
+            (c): c is NonNullable<typeof c> =>
+              c !== undefined && c !== null && typeof c.message === 'string' && c.message.trim().length > 0,
+          )
+          .map((c) => ({
+            role: c.role,
+            content: c.message.trim(),
+          })) as ChatCompletionMessageParam[]),
         {
           role: 'user',
           content: `Question: "${query}"`,

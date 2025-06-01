@@ -5,6 +5,7 @@ import { Response } from 'express'
 import { SupabaseClient } from '@supabase/supabase-js'
 import { UnauthorizedError } from '@src/core/errors'
 import { EmbeddingService } from '@src/ai/embedding/services/embedding.service'
+import { Role } from '@src/ai/types'
 
 export class ChatService {
   private client: SupabaseClient
@@ -13,6 +14,19 @@ export class ChatService {
   constructor() {
     this.client = SupabaseDb.getInstance()
     this.conversationService = new ConversationService()
+  }
+
+  private convertChatRoleToRole(chatRole: ChatRole): Role {
+    switch (chatRole) {
+      case ChatRole.USER:
+        return Role.USER
+      case ChatRole.ASSISTANT:
+        return Role.ASSISTANT
+      case ChatRole.SYSTEM:
+        return Role.SYSTEM
+      default:
+        return Role.USER
+    }
   }
 
   async createChat(message: string, role: ChatRole, userId: string | null, conversationId: string): Promise<Chat> {
@@ -79,8 +93,16 @@ export class ChatService {
 
       await this.createChat(body.message, ChatRole.USER, user.id, conversationId)
 
+      const previousChats = await this.findAllByConversationId(conversationId)
+      const context = previousChats
+        .filter((chat) => chat.message && chat.message.trim().length > 0)
+        .map((chat) => ({
+          role: this.convertChatRoleToRole(chat.role),
+          message: chat.message.trim(),
+        }))
+
       const embeddingService = new EmbeddingService()
-      const stream = await embeddingService.handleQueryStream(body.message, body.knowledgeBaseId)
+      const stream = await embeddingService.handleQueryStream(body.message, body.knowledgeBaseId, context)
 
       let fullResponse = ''
 
