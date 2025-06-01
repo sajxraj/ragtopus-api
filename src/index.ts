@@ -1,17 +1,20 @@
 import jwt from 'jsonwebtoken'
 import 'dotenv/config'
 import express, { Express, Request, Response, NextFunction } from 'express'
-import bodyParser from 'body-parser'
 import multer from 'multer'
 import { EmbeddingService } from '@src/ai/embedding/services/embedding.service'
 import { verifySupabaseToken } from '@src/supabase/middlewares/verify-auth-token.middlware'
-import type {} from './types/express'
+import type {} from '@src/types/express'
 import { ChatRequestSchema } from '@src/types'
 import { SupabaseDb } from '@src/supabase/client/supabase'
 import * as process from 'node:process'
 import { EmbedKnowledgeBaseAction } from '@src/knowledge-base/actions/embed-knowledge-base.action'
 import { GeneratePublicLinkAction } from '@src/knowledge-base/actions/generate-public-link.action'
 import { ChatPublicAction } from '@src/conversation/actions/public/chat-public.action'
+import cors from 'cors'
+import { errorHandler } from '@src/core/middleware/error-handler'
+import conversationRoutes from '@src/conversation/routes'
+import chatRoutes from '@src/chat/routes'
 
 const app: Express = express()
 const port = process.env.PORT || 3000
@@ -19,7 +22,8 @@ const port = process.env.PORT || 3000
 const storage = multer.memoryStorage()
 const upload = multer({ storage })
 
-app.use(bodyParser.json())
+app.use(cors())
+app.use(express.json())
 
 app.get('/', (_req: Request, res: Response) => {
   res.send({
@@ -46,8 +50,12 @@ app.post('/public/v1/chat/:id', async (req: Request, res: Response) => {
 
 app.post('/v1/knowledge-bases/query', verifySupabaseToken, async (req: Request, res: Response) => {
   try {
-    const db = SupabaseDb.getInstance()
-    const knowledgeBase = await db.from('knowledge_bases').select('id, user_id').eq('id', req.body.knowledgeBaseId).single()
+    const supabase = SupabaseDb.getInstance()
+    const knowledgeBase = await supabase
+      .from('knowledge_bases')
+      .select('id, user_id')
+      .eq('id', req.body.knowledgeBaseId)
+      .single()
 
     if (!knowledgeBase.data) {
       return res.status(400).json({
@@ -89,6 +97,11 @@ app.post('/auth', (req: Request, res: Response) => {
   })
 })
 
+app.use('/v1/conversations', conversationRoutes)
+app.use('/v1/chats', chatRoutes)
+
+app.use(errorHandler)
+
 app.listen(port, () => {
-  console.log(`[server]: Server is running at http://localhost:${port}`)
+  console.log(`Server is running on port ${port}`)
 })

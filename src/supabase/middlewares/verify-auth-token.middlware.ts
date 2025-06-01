@@ -7,7 +7,15 @@ interface SupabaseJWT {
   sub: string
   email?: string
   role?: string
-  [key: string]: unknown // or a specific type if known
+  [key: string]: unknown
+}
+
+interface ExpressUser {
+  id: string
+  sub: string
+  email?: string
+  role?: string
+  [key: string]: unknown
 }
 
 export function verifySupabaseToken(req: Request, res: Response, next: NextFunction) {
@@ -20,8 +28,14 @@ export function verifySupabaseToken(req: Request, res: Response, next: NextFunct
   const token = authHeader.split(' ')[1]
 
   try {
-    req.user = jwt.verify(token, SUPABASE_JWT_SECRET) as SupabaseJWT
-    console.log(req.user)
+    const decoded = jwt.verify(token, SUPABASE_JWT_SECRET) as SupabaseJWT
+    const user: ExpressUser = {
+      id: decoded.sub, // Use sub as id since that's the user's unique identifier in Supabase
+      sub: decoded.sub,
+      email: decoded.email,
+      role: decoded.role,
+    }
+    req.user = user
     next()
   } catch (err) {
     const error = err as jwt.JsonWebTokenError

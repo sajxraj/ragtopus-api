@@ -20,8 +20,8 @@ export class EmbeddingUtils {
   }
 
   static async storeInDatabase(content: string, embedding: number[], body: EmbeddingRequest): Promise<void> {
-    const db = SupabaseDb.getInstance()
-    const { error } = await db.from('documents').insert({
+    const supabase = SupabaseDb.getInstance()
+    const { error } = await supabase.from('documents').insert({
       content: content.replace(/\n/g, ' '),
       embedding,
       knowledge_base_id: body.knowledgeBaseId,

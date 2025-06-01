@@ -4,8 +4,8 @@ import { SupabaseDb } from '@src/supabase/client/supabase'
 export class GeneratePublicLinkAction {
   async generate(req: Request, res: Response) {
     try {
-      const db = SupabaseDb.getInstance()
-      const knowledgeBase = await db.from('knowledge_bases').select('id, user_id').eq('id', req.params.id).single()
+      const supabase = SupabaseDb.getInstance()
+      const knowledgeBase = await supabase.from('knowledge_bases').select('id, user_id').eq('id', req.params.id).single()
 
       if (!knowledgeBase.data) {
         return res.status(400).json({
@@ -19,7 +19,7 @@ export class GeneratePublicLinkAction {
         })
       }
 
-      const existingPublicLink = await db
+      const existingPublicLink = await supabase
         .from('public_links')
         .select('id, knowledge_base_id')
         .eq('knowledge_base_id', knowledgeBase.data.id)
@@ -38,7 +38,7 @@ export class GeneratePublicLinkAction {
         })
       }
 
-      const publicLink = await db
+      const publicLink = await supabase
         .from('public_links')
         .insert({
           knowledge_base_id: knowledgeBase.data.id,

@@ -6,13 +6,17 @@ import { z } from 'zod'
 
 export class EmbedKnowledgeBaseAction {
   async embed(req: Request, res: Response) {
-    const db = SupabaseDb.getInstance()
+    const supabase = SupabaseDb.getInstance()
 
     if (!req.body.knowledgeBaseId) {
       return res.status(400).json({ message: 'knowledgeBaseId is required.' })
     }
 
-    const knowledgeBase = await db.from('knowledge_bases').select('id, user_id').eq('id', req.body.knowledgeBaseId).single()
+    const knowledgeBase = await supabase
+      .from('knowledge_bases')
+      .select('id, user_id')
+      .eq('id', req.body.knowledgeBaseId)
+      .single()
 
     if (!knowledgeBase.data) {
       return res.status(400).json({
