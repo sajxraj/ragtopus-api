@@ -1,0 +1,1 @@
+CREATE TYPE chat_role AS ENUM ('user', 'assistant', 'system'); 
