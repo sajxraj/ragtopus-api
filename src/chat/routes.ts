@@ -28,15 +28,15 @@ router.post('/stream', authenticateUser, validateRequest(chatRequestSchema), asy
 
     console.log('Starting stream request with user:', req.user)
     await chatService.streamText(req.body, res, req.user)
-    res.write(`data: [DONE]\n\n`)
   } catch (error) {
     console.error('Error occurred during streaming:', error)
     if (error instanceof Error) {
       console.error('Error stack:', error.stack)
     }
-    res.write(`data: ${JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' })}\n\n`)
-  } finally {
-    res.end()
+    if (!res.writableEnded) {
+      res.write(`data: ${JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' })}\n\n`)
+      res.end()
+    }
   }
 })
 

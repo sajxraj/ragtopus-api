@@ -48,15 +48,11 @@ export class ChatService {
     user: { id: string; sub: string; email?: string },
   ) {
     try {
-      console.log('Starting streamText with:', { body, user })
-
       const { data: knowledgeBase, error: kbError } = await this.client
         .from('knowledge_bases')
         .select('id, user_id')
         .eq('id', body.knowledgeBaseId)
         .single()
-
-      console.log('Knowledge base query result:', { knowledgeBase, kbError })
 
       if (kbError) {
         console.error('Knowledge base query error:', kbError)
@@ -84,19 +80,38 @@ export class ChatService {
       await this.createChat(body.message, ChatRole.USER, user.id, conversationId)
 
       const embeddingService = new EmbeddingService()
-      await embeddingService.handleQuery(body.message, body.knowledgeBaseId)
+      const stream = await embeddingService.handleQueryStream(body.message, body.knowledgeBaseId)
 
-      const aiResponse = 'AI response will be implemented here'
-      await this.createChat(aiResponse, ChatRole.ASSISTANT, null, conversationId)
+      let fullResponse = ''
+
+      for await (const chunk of stream) {
+        if (!res.writableEnded) {
+          fullResponse += chunk
+          const message = JSON.stringify({
+            message: chunk,
+            conversationId,
+          })
+          res.write(`data: ${message}\n\n`)
+        }
+      }
+
+      await this.createChat(fullResponse, ChatRole.ASSISTANT, null, conversationId)
       await this.conversationService.updateLastInteractedAt(conversationId)
 
-      res.write(`data: ${JSON.stringify({ message: aiResponse })}\n\n`)
+      if (!res.writableEnded) {
+        console.log('Stream complete, sending [DONE]')
+        res.write('data: [DONE]\n\n')
+        res.end()
+      }
     } catch (error) {
       console.error('Error in streamText:', error)
       if (error instanceof Error) {
         console.error('Error stack:', error.stack)
       }
-      res.write(`data: ${JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' })}\n\n`)
+      if (!res.writableEnded) {
+        res.write(`data: ${JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' })}\n\n`)
+        res.end()
+      }
     }
   }
 }

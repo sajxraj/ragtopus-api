@@ -32,7 +32,7 @@ export function verifySupabaseToken(req: Request, res: Response, next: NextFunct
     const user: ExpressUser = {
       id: decoded.sub, // Use sub as id since that's the user's unique identifier in Supabase
       sub: decoded.sub,
-      email: decoded.email,
+      email: decoded.email || '', // Ensure email is always set
       role: decoded.role,
     }
     req.user = user

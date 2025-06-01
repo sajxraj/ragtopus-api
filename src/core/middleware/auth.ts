@@ -7,7 +7,9 @@ declare module 'express' {
     user?: {
       id: string
       sub: string
-      email: string
+      email?: string
+      role?: string
+      [key: string]: unknown
     }
   }
 }
