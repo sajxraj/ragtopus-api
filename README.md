@@ -1,5 +1,5 @@
 <p align="center">
-  <img srcs="assets/ragtopus.png" alt="Ragtopus Logo" width="200"/>
+  <img srcq="assets/ragtopus.png" alt="Ragtopus Logo" width="200"/>
 </p>
 
 # 🐙 RAGtopus
