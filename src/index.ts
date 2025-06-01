@@ -2,11 +2,8 @@ import jwt from 'jsonwebtoken'
 import 'dotenv/config'
 import express, { Express, Request, Response, NextFunction } from 'express'
 import multer from 'multer'
-import { EmbeddingService } from '@src/ai/embedding/services/embedding.service'
 import { verifySupabaseToken } from '@src/supabase/middlewares/verify-auth-token.middlware'
 import type {} from '@src/types/express'
-import { ChatRequestSchema } from '@src/types'
-import { SupabaseDb } from '@src/supabase/client/supabase'
 import * as process from 'node:process'
 import { EmbedKnowledgeBaseAction } from '@src/knowledge-base/actions/embed-knowledge-base.action'
 import { GeneratePublicLinkAction } from '@src/knowledge-base/actions/generate-public-link.action'
@@ -48,38 +45,9 @@ app.post('/public/v1/chat/:id', async (req: Request, res: Response) => {
   await chatPublicAction.chat(req, res)
 })
 
-app.post('/v1/knowledge-bases/query', verifySupabaseToken, async (req: Request, res: Response) => {
-  try {
-    const supabase = SupabaseDb.getInstance()
-    const knowledgeBase = await supabase
-      .from('knowledge_bases')
-      .select('id, user_id')
-      .eq('id', req.body.knowledgeBaseId)
-      .single()
-
-    if (!knowledgeBase.data) {
-      return res.status(400).json({
-        message: 'Knowledge base not found',
-      })
-    }
-
-    if (knowledgeBase.data.user_id !== req.user?.sub) {
-      return res.status(403).json({
-        message: 'You do not have permission to query this knowledge base',
-      })
-    }
-
-    const body = ChatRequestSchema.parse(req.body)
-    const embeddingService = new EmbeddingService()
-    const result = await embeddingService.handleQuery(body.query, body.knowledgeBaseId)
-
-    res.status(200).json(result)
-  } catch (error) {
-    console.log(error)
-    res.status(500).json({
-      message: 'Error occurred',
-    })
-  }
+app.post('/public/v1/chat/:id/stream', async (req: Request, res: Response) => {
+  const chatPublicAction = new ChatPublicAction()
+  await chatPublicAction.streamedChat(req, res)
 })
 
 app.post('/auth', (req: Request, res: Response) => {

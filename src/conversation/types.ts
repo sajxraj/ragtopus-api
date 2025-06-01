@@ -1,9 +1,9 @@
 export interface Conversation {
   id: string
   title: string
-  lastInteractedAt: Date | null
-  userId: string
+  last_interacted_at: Date | null
+  user_id: string
   description: string
-  createdAt: Date
-  updatedAt: Date
+  created_at: Date
+  updated_at: Date
 }
