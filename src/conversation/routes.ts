@@ -20,7 +20,8 @@ router.get('/:conversationId', authenticateUser, async (req: Request, res: Respo
     throw new UnauthorizedError('User not authenticated')
   }
   const conversation = await conversationService.checkAccess(req.params.conversationId, req.user.id)
-  res.json(conversation)
+  const c = conversation
+  res.json(c)
 })
 
 router.delete('/:conversationId', authenticateUser, async (req: Request, res: Response) => {
