@@ -45,6 +45,43 @@ export class ChatService {
     return data
   }
 
+  async findPaginatedByConversationId(
+    conversationId: string,
+    page: number = 1,
+    limit: number = 20,
+  ): Promise<{ data: Chat[]; total: number; page: number; limit: number }> {
+    try {
+      const from = (page - 1) * limit
+      const to = from + limit - 1
+
+      const { count, error: countError } = await this.client
+        .from('chats')
+        .select('*', { count: 'exact', head: true })
+        .eq('conversation_id', conversationId)
+
+      if (countError) throw countError
+
+      const { data, error } = await this.client
+        .from('chats')
+        .select('*')
+        .eq('conversation_id', conversationId)
+        .order('created_at', { ascending: false })
+        .range(from, to)
+
+      if (error) throw error
+
+      return {
+        data: data || [],
+        total: count || 0,
+        page,
+        limit,
+      }
+    } catch (error) {
+      console.error('Error in findPaginatedByConversationId:', error)
+      throw error
+    }
+  }
+
   async findAllByConversationId(conversationId: string): Promise<Chat[]> {
     const { data, error } = await this.client
       .from('chats')

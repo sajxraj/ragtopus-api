@@ -39,9 +39,14 @@ router.get('/:conversationId/chats', authenticateUser, async (req: Request, res:
     }
     await conversationService.checkAccess(req.params.conversationId, req.user.id)
     const chatService = new ChatService()
-    const chats = await chatService.findAllByConversationId(req.params.conversationId)
+
+    const page = Math.max(1, parseInt(req.query.page as string) || 1)
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 20))
+
+    const chats = await chatService.findPaginatedByConversationId(req.params.conversationId, page, limit)
     res.json(chats)
   } catch (error) {
+    console.error('Error fetching chats:', error)
     next(error)
   }
 })
