@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { PublicChatRequestSchema } from '@src/types'
 import { EmbeddingService } from '@src/ai/embedding/services/embedding.service'
 
-export class ChatPublicAction {
+export class ChatPublicService {
   private async validateRequest(req: Request) {
     if (!req.params.id) {
       throw new Error('Token is required.')
