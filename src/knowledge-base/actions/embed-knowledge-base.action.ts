@@ -40,6 +40,7 @@ export class EmbedKnowledgeBaseAction {
           .insert({
             filename: req.file.originalname,
             user_id: req.user?.sub,
+            knowledge_base_id: knowledgeBase.data.id,
           })
           .select('id')
           .single()
@@ -57,6 +58,7 @@ export class EmbedKnowledgeBaseAction {
           .insert({
             url,
             user_id: req.user?.sub,
+            knowledge_base_id: knowledgeBase.data.id,
           })
           .select('id')
           .single()
