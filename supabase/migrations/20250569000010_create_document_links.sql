@@ -40,4 +40,4 @@ CREATE POLICY "Users can delete their own document links"
 CREATE TRIGGER set_updated_at
     BEFORE UPDATE ON document_links
     FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column(); 
+    EXECUTE FUNCTION update_updated_at_column();

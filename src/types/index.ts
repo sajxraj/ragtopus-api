@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { Role } from '@src/ai/types'
 
 export const EmbeddingRequestSchema = z.object({
-  url: z.string().optional(), // Made url optional
+  url: z.string().optional(),
   knowledgeBaseId: z.string(),
   fetchChildren: z.boolean().optional(),
   documentLinkId: z.string().optional(),
