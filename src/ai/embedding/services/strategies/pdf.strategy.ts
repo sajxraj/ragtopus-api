@@ -18,6 +18,7 @@ export class PdfStrategy implements EmbeddingInterface {
     await EmbeddingUtils.processContent(content, {
       knowledgeBaseId: body.knowledgeBaseId,
       url: undefined,
+      documentLinkId: body.documentLinkId,
     })
   }
 }

@@ -32,11 +32,39 @@ export class EmbedKnowledgeBaseAction {
 
     try {
       let validatedBody
+      let documentLinkId: string | undefined
       if (req.file) {
-        const pdfRequestBody = { ...req.body, sourceType: 'pdf' }
+        // For PDF uploads
+        const { data: linkData, error: linkError } = await supabase
+          .from('document_links')
+          .insert({
+            filename: req.file.originalname,
+            user_id: req.user?.sub,
+          })
+          .select('id')
+          .single()
+        if (linkError || !linkData) {
+          return res.status(500).json({ message: 'Failed to create document link' })
+        }
+        documentLinkId = linkData.id
+        const pdfRequestBody = { ...req.body, sourceType: 'pdf', documentLinkId }
         validatedBody = PdfEmbeddingRequestSchema.parse(pdfRequestBody)
       } else {
-        validatedBody = EmbeddingRequestSchema.parse(req.body)
+        // For URL/link uploads
+        const { url } = req.body
+        const { data: linkData, error: linkError } = await supabase
+          .from('document_links')
+          .insert({
+            url,
+            user_id: req.user?.sub,
+          })
+          .select('id')
+          .single()
+        if (linkError || !linkData) {
+          return res.status(500).json({ message: 'Failed to create document link' })
+        }
+        documentLinkId = linkData.id
+        validatedBody = EmbeddingRequestSchema.parse({ ...req.body, documentLinkId })
       }
 
       const embeddingService = new EmbeddingService()

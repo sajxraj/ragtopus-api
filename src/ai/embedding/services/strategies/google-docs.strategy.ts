@@ -42,7 +42,10 @@ export class GoogleDocsStrategy implements EmbeddingInterface {
           ?.map((block) => block.paragraph?.elements?.map((el) => el.textRun?.content).join(''))
           .join('\n') || ''
 
-      await EmbeddingUtils.processContent(content, body)
+      await EmbeddingUtils.processContent(content, {
+        ...body,
+        documentLinkId: body.documentLinkId,
+      })
     } catch (error) {
       console.error('Error in GoogleDocsStrategy:', error)
       throw error

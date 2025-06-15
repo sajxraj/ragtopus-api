@@ -21,12 +21,15 @@ export class EmbeddingUtils {
 
   static async storeInDatabase(content: string, embedding: number[], body: EmbeddingRequest): Promise<void> {
     const supabase = SupabaseDb.getInstance()
-    const { error } = await supabase.from('documents').insert({
+    const insertData: { document_link_id?: string; content: string; embedding: number[]; knowledge_base_id: string } = {
       content: content.replace(/\n/g, ' '),
       embedding,
       knowledge_base_id: body.knowledgeBaseId,
-    })
-
+    }
+    if (body.documentLinkId) {
+      insertData.document_link_id = body.documentLinkId
+    }
+    const { error } = await supabase.from('documents').insert(insertData)
     if (error) {
       throw error
     }

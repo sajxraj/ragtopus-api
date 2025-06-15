@@ -13,6 +13,9 @@ export class WebCrawlerStrategy implements EmbeddingInterface {
     const docs = await loader.load()
 
     const content = docs.map((doc) => doc.pageContent).join('\n\n')
-    await EmbeddingUtils.processContent(content, body)
+    await EmbeddingUtils.processContent(content, {
+      ...body,
+      documentLinkId: body.documentLinkId,
+    })
   }
 }

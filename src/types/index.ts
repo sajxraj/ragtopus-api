@@ -5,6 +5,7 @@ export const EmbeddingRequestSchema = z.object({
   url: z.string().optional(), // Made url optional
   knowledgeBaseId: z.string(),
   fetchChildren: z.boolean().optional(),
+  documentLinkId: z.string().optional(),
 })
 export type EmbeddingRequest = z.infer<typeof EmbeddingRequestSchema>
 
