@@ -23,7 +23,7 @@ export class SlackService {
     const args = text.trim().split(/\s+/)
     const command = args[0]
     const subcommand = args[1]
-    const rest = args.slice(2).join(' ')
+    const rest = args.slice(1).join(' ')
     const mappingType = channelName === 'directmessage' ? 'user' : 'channel'
     const slackId = channelName === 'directmessage' ? userId : channelId
 
@@ -46,7 +46,8 @@ export class SlackService {
       )
       if (error) {
         console.error('Error setting mapping:', error)
-        throw error
+
+        return `Failed to set public ID \`${publicId}\` for ${channelName === 'directmessage' ? `<@${userId}>` : 'this channel'}`
       }
       return `Public ID \`${publicId}\` set for ${channelName === 'directmessage' ? `<@${userId}>` : 'this channel'}`
     }
@@ -64,11 +65,13 @@ export class SlackService {
 
       if (fetchError || !mapping) {
         console.log('No mapping found for removal')
+
         return `No public ID set for ${channelName === 'directmessage' ? 'you' : 'this channel'}.`
       }
 
       if (mapping.public_link_id !== subcommand) {
         console.log('Public ID mismatch:', { provided: subcommand, current: mapping.public_link_id })
+
         return `The public ID you provided does not match your current mapping.`
       }
 
@@ -91,6 +94,7 @@ export class SlackService {
         .eq('slack_id', slackId)
         .eq('mapping_type', mappingType)
         .single()
+      console.log(mapping)
 
       if (error || !mapping) {
         console.log('No mapping found for ask')
