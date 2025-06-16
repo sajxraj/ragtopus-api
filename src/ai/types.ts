@@ -44,3 +44,11 @@ export enum ER {
 }
 
 const ER = {}
+
+export enum BLU {
+  SYSTEM = 'system',
+  USER = 'user',
+  ASSISTANT = 'assistant',
+}
+
+const BLU = {}
