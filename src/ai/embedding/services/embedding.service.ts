@@ -27,9 +27,7 @@ export class EmbeddingService {
 
   async handleQuery(query: string, knowledgeBaseId: string, context?: ChatContext[]): Promise<string> {
     try {
-      console.log(query, knowledgeBaseId)
       const embedding = await EmbeddingUtils.generateEmbedding(query)
-
       const supabase = SupabaseDb.getInstance()
       const response = await supabase.rpc('match_documents', {
         query_embedding: embedding,

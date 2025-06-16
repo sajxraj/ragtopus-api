@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { SlackService } from './services/slack.service'
+import { SlackService } from '@src/slack/services/slack.service'
 
 const router = Router()
 const slackService = new SlackService()
@@ -17,11 +17,10 @@ router.post('/command', async (req, res, next) => {
 
     res.status(200).send({
       response_type: 'ephemeral',
-      text: 'Processing your request...',
+      text: `Processing your request for the question "${text}"...`,
     })
 
     const response = await slackService.handleCommand(user_id, text, channel_id, channel_name)
-    console.log('Sending response to Slack:', response)
 
     await fetch(response_url, {
       method: 'POST',

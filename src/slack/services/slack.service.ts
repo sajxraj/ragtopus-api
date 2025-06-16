@@ -16,7 +16,6 @@ export class SlackService {
 
     // If no text, show help
     if (!text) {
-      console.log('No text provided, showing help')
       return HELP_MESSAGE
     }
 
@@ -30,7 +29,6 @@ export class SlackService {
     // /rag set <public-link-id>
     if (command === 'set' && args.length === 2) {
       const publicId = args[1]
-      console.log('Setting public ID:', { publicId, slackId, mappingType })
 
       const { error } = await this.db.from('slack_mappings').upsert(
         {
@@ -51,8 +49,6 @@ export class SlackService {
 
     // /rag remove <public-link-id>
     if (command === 'remove' && args.length === 2) {
-      console.log('Removing public ID:', { args, slackId, mappingType })
-
       const { data: mapping, error: fetchError } = await this.db
         .from('slack_mappings')
         .select('public_link_id')
@@ -61,12 +57,10 @@ export class SlackService {
         .single()
 
       if (fetchError || !mapping) {
-        console.log('No mapping found for removal')
         return `No public ID set for ${channelName === 'directmessage' ? 'you' : 'this channel'}.`
       }
 
       if (mapping.public_link_id !== args[1]) {
-        console.log('Public ID mismatch:', { provided: args[1], current: mapping.public_link_id })
         return `The public ID you provided does not match your current mapping.`
       }
 
@@ -97,13 +91,13 @@ export class SlackService {
         return `No public ID set for ${channelName === 'directmessage' ? 'you' : 'this channel'}.\nUse \`/rag set <public-link-id>\` first.`
       }
 
-      const knowledgeBase = await this.db
+      const publicLink = await this.db
         .from('public_links')
         .select('id, knowledge_base_id')
         .eq('id', mapping.public_link_id)
         .single()
 
-      if (!knowledgeBase.data) {
+      if (!publicLink.data) {
         console.log('Public link not found:', mapping.public_link_id)
         return 'Public link not found'
       }
@@ -114,8 +108,7 @@ export class SlackService {
       })
       const embeddingService = new EmbeddingService()
 
-      console.log('Querying knowledge base:', { knowledgeBaseId: knowledgeBase.data.id })
-      return await embeddingService.handleQuery(body.message, knowledgeBase.data.id)
+      return await embeddingService.handleQuery(body.message, publicLink.data.knowledge_base_id)
     }
 
     console.log('No matching command, showing help')
