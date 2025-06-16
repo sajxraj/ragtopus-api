@@ -36,3 +36,11 @@ export enum SMS {
 }
 
 const SMS = {}
+
+export enum ER {
+  SYSTEM = 'system',
+  USER = 'user',
+  ASSISTANT = 'assistant',
+}
+
+const ER = {}
