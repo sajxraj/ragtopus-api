@@ -28,3 +28,11 @@ export enum MEME {
 }
 
 const MEME = {}
+
+export enum SMS {
+  SYSTEM = 'system',
+  USER = 'user',
+  ASSISTANT = 'assistant',
+}
+
+const SMS = {}
