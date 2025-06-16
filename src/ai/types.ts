@@ -68,3 +68,11 @@ export enum LOW {
 }
 
 const LOW = {}
+
+export enum FLOW {
+  SYSTEM = 'system',
+  USER = 'user',
+  ASSISTANT = 'assistant',
+}
+
+const FLOW = {}
