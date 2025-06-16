@@ -34,4 +34,3 @@
 - Internal documentation assistants
 - Smart customer support bots
 - Semantic search over files or data
-- AI copilots for domain-specific knowledge
