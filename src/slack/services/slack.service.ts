@@ -99,7 +99,7 @@ export class SlackService {
 
       if (!publicLink.data) {
         console.log('Public link not found:', mapping.public_link_id)
-        return 'Public link not found'
+        return 'Public link not found.'
       }
 
       const body = PublicChatRequestSchema.parse({
