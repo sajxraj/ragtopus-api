@@ -68,31 +68,3 @@ export enum LOW {
 }
 
 const LOW = {}
-
-export enum FLOW {
-  SYSTEM = 'system',
-  USER = 'user',
-  ASSISTANT = 'assistant',
-}
-
-const FLOW = {}
-
-export enum BLOW {
-  SYSTEM = 'system',
-  USER = 'user',
-  ASSISTANT = 'assistant',
-}
-
-const BLOW = {}
-
-const AI = {
-  MEME,
-  SMS,
-  ER,
-  BLU,
-  SLOW,
-  LOW,
-  FLOW,
-  BLOW,
-}
-console.log(AI)
