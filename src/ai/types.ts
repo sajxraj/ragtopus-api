@@ -19,4 +19,4 @@ export enum ABC {
 
 const ABC = {}
 
-console.log(ABC, User)
+console.log(ABC)
