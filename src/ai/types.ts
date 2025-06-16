@@ -9,4 +9,4 @@ const Role = {}
 const User = {
   SYSTEM: Role.SYSTEM,
 }
-console.log({ User, Role })
+console.log({ User })
