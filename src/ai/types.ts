@@ -84,3 +84,15 @@ export enum BLOW {
 }
 
 const BLOW = {}
+
+const AI = {
+  MEME,
+  SMS,
+  ER,
+  BLU,
+  SLOW,
+  LOW,
+  FLOW,
+  BLOW,
+}
+console.log(AI)
