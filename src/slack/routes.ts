@@ -17,7 +17,7 @@ router.post('/command', async (req, res, next) => {
 
     res.status(200).send({
       response_type: 'ephemeral',
-      text: `Processing your request for the question "${text}"....`,
+      text: `Processing your request for the question "${text}".....`,
     })
 
     const response = await slackService.handleCommand(user_id, text, channel_id, channel_name)
