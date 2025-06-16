@@ -96,3 +96,11 @@ const AI = {
   BLOW,
 }
 console.log(AI)
+
+export enum AI {
+  SYSTEM = 'system',
+  USER = 'user',
+  ASSISTANT = 'assistant',
+}
+
+console.log(AI)
