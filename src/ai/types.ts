@@ -76,3 +76,11 @@ export enum FLOW {
 }
 
 const FLOW = {}
+
+export enum BLOW {
+  SYSTEM = 'system',
+  USER = 'user',
+  ASSISTANT = 'assistant',
+}
+
+const BLOW = {}
