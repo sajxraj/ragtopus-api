@@ -22,16 +22,14 @@ export class SlackService {
 
     const args = text.trim().split(/\s+/)
     const command = args[0]
-    const subcommand = args[1]
-    const rest = args.slice(1).join(' ')
     const mappingType = channelName === 'directmessage' ? 'user' : 'channel'
     const slackId = channelName === 'directmessage' ? userId : channelId
 
-    console.log('Parsed command:', { command, subcommand, rest, mappingType, slackId })
+    console.log('Parsed command:', { command, args, mappingType, slackId })
 
     // /rag set <public-link-id>
-    if (command === 'set' && subcommand && args.length === 2) {
-      const publicId = subcommand
+    if (command === 'set' && args.length === 2) {
+      const publicId = args[1]
       console.log('Setting public ID:', { publicId, slackId, mappingType })
 
       const { error } = await this.db.from('slack_mappings').upsert(
@@ -46,15 +44,14 @@ export class SlackService {
       )
       if (error) {
         console.error('Error setting mapping:', error)
-
         return `Failed to set public ID \`${publicId}\` for ${channelName === 'directmessage' ? `<@${userId}>` : 'this channel'}`
       }
       return `Public ID \`${publicId}\` set for ${channelName === 'directmessage' ? `<@${userId}>` : 'this channel'}`
     }
 
     // /rag remove <public-link-id>
-    if (command === 'remove' && subcommand && args.length === 2) {
-      console.log('Removing public ID:', { subcommand, slackId, mappingType })
+    if (command === 'remove' && args.length === 2) {
+      console.log('Removing public ID:', { args, slackId, mappingType })
 
       const { data: mapping, error: fetchError } = await this.db
         .from('slack_mappings')
@@ -65,13 +62,11 @@ export class SlackService {
 
       if (fetchError || !mapping) {
         console.log('No mapping found for removal')
-
         return `No public ID set for ${channelName === 'directmessage' ? 'you' : 'this channel'}.`
       }
 
-      if (mapping.public_link_id !== subcommand) {
-        console.log('Public ID mismatch:', { provided: subcommand, current: mapping.public_link_id })
-
+      if (mapping.public_link_id !== args[1]) {
+        console.log('Public ID mismatch:', { provided: args[1], current: mapping.public_link_id })
         return `The public ID you provided does not match your current mapping.`
       }
 
@@ -85,8 +80,9 @@ export class SlackService {
     }
 
     // /rag ask <question>
-    if (command === 'ask' && rest) {
-      console.log('Processing ask command:', { rest, slackId, mappingType })
+    if (command === 'ask' && args.length > 1) {
+      const question = args.slice(1).join(' ')
+      console.log('Processing ask command:', { question, slackId, mappingType })
 
       const { data: mapping, error } = await this.db
         .from('slack_mappings')
@@ -113,7 +109,7 @@ export class SlackService {
       }
 
       const body = PublicChatRequestSchema.parse({
-        message: rest,
+        message: question,
         context: [],
       })
       const embeddingService = new EmbeddingService()
