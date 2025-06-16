@@ -8,12 +8,14 @@ import { errorHandler } from '@src/core/middleware/error-handler'
 import conversationRoutes from '@src/conversation/routes'
 import chatRoutes from '@src/chat/routes'
 import knowledgeBaseRoutes from '@src/knowledge-base/routes'
+import slackRoutes from '@src/slack/routes'
 
 const app: Express = express()
 const port = process.env.PORT || 3000
 
 app.use(cors())
 app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
 // Auth route for local testing
 app.post('/auth', (req: Request, res: Response) => {
@@ -46,6 +48,7 @@ app.post('/public/v1/chat/:id/stream', async (req: Request, res: Response) => {
 app.use('/v1/conversations', conversationRoutes)
 app.use('/v1/chats', chatRoutes)
 app.use('/v1/knowledge-bases', knowledgeBaseRoutes)
+app.use('/v1/slack', slackRoutes)
 
 // Error handling - must be after all routes
 app.use(errorHandler)
