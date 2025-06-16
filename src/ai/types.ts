@@ -52,3 +52,11 @@ export enum BLU {
 }
 
 const BLU = {}
+
+export enum SLOW {
+  SYSTEM = 'system',
+  USER = 'user',
+  ASSISTANT = 'assistant',
+}
+
+const SLOW = {}
