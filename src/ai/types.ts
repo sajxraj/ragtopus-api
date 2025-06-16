@@ -60,3 +60,11 @@ export enum SLOW {
 }
 
 const SLOW = {}
+
+export enum LOW {
+  SYSTEM = 'system',
+  USER = 'user',
+  ASSISTANT = 'assistant',
+}
+
+const LOW = {}
