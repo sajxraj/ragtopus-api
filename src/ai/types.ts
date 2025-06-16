@@ -20,3 +20,11 @@ export enum ABC {
 const ABC = {}
 
 console.log(ABC, User)
+
+export enum MEME {
+  SYSTEM = 'system',
+  USER = 'user',
+  ASSISTANT = 'assistant',
+}
+
+const MEME = {}
