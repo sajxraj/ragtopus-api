@@ -4,6 +4,7 @@ import { EmbeddingInterface } from '@src/ai/embedding/services/strategies/embedd
 import atlassianConfig from '@src/configs/atlassian'
 import { EmbeddingRequest } from '@src/types'
 import { EmbeddingUtils } from '@src/ai/embedding/utils/embedding.utils'
+import { SupabaseDb } from '@src/supabase/client/supabase'
 
 function extractConfluenceInfo(url: string): { type: 'page' | 'space'; baseUrl: string; spaceKey: string; pageId?: string } {
   // Page URL: https://example.atlassian.net/wiki/spaces/SPACEKEY/pages/123456789/Page-Title
@@ -38,7 +39,6 @@ async function fetchPageAndChildren(
 ): Promise<ConfluencePage[]> {
   const auth = { username, password: apiToken }
   const apiBase = `${baseUrl}/rest/api`
-  // Fetch main page
   try {
     const mainPage = await axios.get<{ id: string; title: string; body?: { storage?: { value?: string } } }>(
       `${apiBase}/content/${pageId}?expand=body.storage`,
@@ -119,9 +119,28 @@ async function fetchAllPagesInSpace(
 }
 
 export class ConfluenceStrategy implements EmbeddingInterface {
+  private db = SupabaseDb.getInstance()
+
   async generateEmbedding(body: EmbeddingRequest): Promise<void> {
     try {
-      const apiToken = atlassianConfig.apiToken
+      let apiToken = atlassianConfig.apiToken
+      let email = atlassianConfig.email
+
+      if (body.userId) {
+        const { data: settings } = await this.db
+          .from('settings')
+          .select('value')
+          .eq('key', 'atlassian_token')
+          .eq('user_id', body.userId)
+          .single()
+
+        if (settings?.value) {
+          const userSettings = settings.value as { token: string; email: string }
+          apiToken = userSettings.token
+          email = userSettings.email
+        }
+      }
+
       if (!apiToken) {
         throw new Error('Missing Atlassian configuration.')
       }
@@ -131,15 +150,9 @@ export class ConfluenceStrategy implements EmbeddingInterface {
       const info = extractConfluenceInfo(body.url)
       let pages: ConfluencePage[] = []
       if (info.type === 'page') {
-        pages = await fetchPageAndChildren(
-          info.baseUrl,
-          info.pageId!,
-          'sajan.rajbhandari@outside.studio',
-          apiToken,
-          body?.fetchChildren ?? false,
-        )
+        pages = await fetchPageAndChildren(info.baseUrl, info.pageId!, email, apiToken, body?.fetchChildren ?? false)
       } else if (info.type === 'space') {
-        pages = await fetchAllPagesInSpace(info.baseUrl, info.spaceKey, 'sajan.rajbhandari@outside.studio', apiToken)
+        pages = await fetchAllPagesInSpace(info.baseUrl, info.spaceKey, email, apiToken)
       }
 
       // Convert all pages to text and combine

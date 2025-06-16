@@ -48,7 +48,7 @@ export class EmbedKnowledgeBaseAction {
           return res.status(500).json({ message: 'Failed to create document link' })
         }
         documentLinkId = linkData.id
-        const pdfRequestBody = { ...req.body, sourceType: 'pdf', documentLinkId }
+        const pdfRequestBody = { ...req.body, sourceType: 'pdf', documentLinkId, userId: req.user?.sub }
         validatedBody = PdfEmbeddingRequestSchema.parse(pdfRequestBody)
       } else {
         // For URL/link uploads
@@ -66,7 +66,7 @@ export class EmbedKnowledgeBaseAction {
           return res.status(500).json({ message: 'Failed to create document link' })
         }
         documentLinkId = linkData.id
-        validatedBody = EmbeddingRequestSchema.parse({ ...req.body, documentLinkId })
+        validatedBody = EmbeddingRequestSchema.parse({ ...req.body, documentLinkId, userId: req.user?.sub })
       }
 
       const embeddingService = new EmbeddingService()
