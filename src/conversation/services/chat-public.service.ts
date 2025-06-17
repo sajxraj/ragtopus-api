@@ -18,11 +18,6 @@ export class ChatPublicService {
       throw new Error('Public link not found')
     }
 
-    const token = req.header('x-ragtopus-token')
-    if (!token || token !== publicLink.data.secret) {
-      throw new Error('Unauthorized')
-    }
-
     const knowledgeBase = await supabase
       .from('knowledge_bases')
       .select('id, user_id')
