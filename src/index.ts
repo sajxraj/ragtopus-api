@@ -17,6 +17,12 @@ app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
+app.get('/v1/health-check', async (req: Request, res: Response) => {
+  res.status(200).json({
+    data: 'Server is running fine!',
+  })
+})
+
 // Auth route for local testing
 app.post('/auth', (req: Request, res: Response) => {
   const payload = {
